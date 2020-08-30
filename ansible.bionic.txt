@@ -1,0 +1,31 @@
+# tasks file for SACT-Ubuntu
+
+    - name: Update SACT on Ubuntu Bionic
+      shell: apt-get -c /etc/apt/apt.conf.prod {{ item }}
+      with_items:
+        - update
+        - install sact-client
+      when: ansible_distribution_release == "bionic"
+      tags:
+        - install
+
+    - name: Update SACT on Ubuntu Trusty
+      shell: apt-get -c /etc/apt/apt.conf.server-trusty-prod {{ item }}
+      with_items:
+         - update
+         - install sact-client
+      when: ansible_distribution_release == "trusty"
+      tags:
+        - install
+
+    - name: Check installed SACT version
+      shell: dpkg -l | grep sact-client | awk '{print$3}'
+      register: sact_version
+      tags:
+        - check_sact
+        - install
+
+    - local_action: shell echo "{{datehour}} {{ ansible_user_id }},{{ inventory_hostname }},{{ ansible_distribution }},{{ ansible_distribution_release }},{{ ansible_kernel }},sact_version,{{ sact_version.stdout }}" >> "{{ sact_log_file }}"
+      tags:
+        - check_sact
+        - install
